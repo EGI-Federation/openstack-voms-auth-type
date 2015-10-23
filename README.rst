@@ -23,10 +23,10 @@ Usage
 CLI
 ---
 
-You have to specify the `v2voms` in the `--os_auth-type` option and provide a
+You have to specify the `v2voms` in the `--os-auth-type` option and provide a
 valid proxy with `--os-x509-user-proxy`::
 
-    openstack --os-auth-type voms --x509-user-proxy /tmp/x509up_u1000 token issue
+    openstack --os-auth-type v2voms --os-x509-user-proxy /tmp/x509up_u1000 token issue
 
 API
 ---
