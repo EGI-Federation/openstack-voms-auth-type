@@ -15,7 +15,11 @@
 # under the License.
 
 
-from oslo.config import cfg
+try:
+    from oslo.config import cfg
+except ImportError:
+    from oslo_config import cfg
+
 
 from keystoneclient.auth.identity.v2 import Auth
 from keystoneclient import utils
