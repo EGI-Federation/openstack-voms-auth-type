@@ -26,8 +26,8 @@ from keystoneclient import utils
 
 
 class VomsAuthPlugin(Auth):
-    @utils.positional(1)
-    def __init__(self, x509_user_proxy, **kwargs):
+    @utils.positional()
+    def __init__(self, x509_user_proxy=None, **kwargs):
         super(VomsAuthPlugin, self).__init__(**kwargs)
         self.x509_user_proxy = x509_user_proxy
 
