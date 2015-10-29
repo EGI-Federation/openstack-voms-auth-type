@@ -22,7 +22,7 @@ import setuptools
 
 setuptools.setup(
     name="openstack-voms-auth-type",
-    version="1.0",
+    version="1.1",
     author="Enol Fernandez",
     author_email="enolfc@ifca.unican.es",
     description="VOMS-based authentication for Openstack",
