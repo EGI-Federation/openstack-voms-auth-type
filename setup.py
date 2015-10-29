@@ -17,7 +17,6 @@
 # under the License.
 
 
-import os
 import setuptools
 
 
@@ -32,7 +31,8 @@ setuptools.setup(
                       "OpenStack."),
     license="Apache License, Version 2.0",
     url="https://github.com/enolfc/openstack-voms-auth-type",
-    download_url="https://github.com/enolfc/openstack-voms-auth-type/archive/master.tar.gz",
+    download_url=("https://github.com/enolfc/openstack-voms-auth-type/"
+                  "archive/master.tar.gz"),
     packages=setuptools.find_packages(exclude=['tests', 'tests.*']),
     zip_safe=False,
     classifiers=[
@@ -48,5 +48,8 @@ setuptools.setup(
         "keystoneclient.auth.plugin": [
             "v2voms = openstack_voms_auth_type.plugin:VomsAuthPlugin"
         ],
+        "console_scripts": [
+            "keystone_tenants = openstack_voms_auth_type.get_tenants:main"
+        ]
     }
 )
