@@ -15,33 +15,16 @@
 # under the License.
 
 
-try:
-    from oslo.config import cfg
-except ImportError:
-    from oslo_config import cfg
+from keystoneauth1 import loading
+from keystoneauth1.identity import v2
+from positional import positional
 
 
-from keystoneclient.auth.identity.v2 import Auth
-from keystoneclient import utils
-
-
-class VomsAuthPlugin(Auth):
-    @utils.positional()
+class VomsAuthPlugin(v2.Auth):
+    @positional()
     def __init__(self, x509_user_proxy=None, **kwargs):
         super(VomsAuthPlugin, self).__init__(**kwargs)
         self.x509_user_proxy = x509_user_proxy
-
-    @classmethod
-    def get_options(cls):
-        options = super(VomsAuthPlugin, cls).get_options()
-
-        options.extend([
-            cfg.StrOpt('x509-user-proxy',
-                       default=None,
-                       help=("VOMS proxy to use with 'voms' auth system. "
-                             "Defaults to env[OS_X509_USER_PROXY].")),
-        ])
-        return options
 
     def get_auth_data(self, headers=None):
         return {'voms': True}
@@ -53,3 +36,20 @@ class VomsAuthPlugin(Auth):
             msg = 'You need to specify a proxy file when using voms auth'
             raise TypeError(msg)
         return super(VomsAuthPlugin, self).get_auth_ref(session, **kwargs)
+
+
+class VomsLoader(loading.BaseV2Loader):
+    @property
+    def plugin_class(self):
+        return VomsAuthPlugin
+
+    def get_options(self):
+        options = super(VomsLoader, self).get_options()
+
+        options.extend([
+            loading.Opt('x509-user-proxy',
+                        default=None,
+                        help=("VOMS proxy to use with 'voms' auth system. "
+                              "Defaults to env[OS_X509_USER_PROXY].")),
+        ])
+        return options
