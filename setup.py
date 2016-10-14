@@ -19,37 +19,15 @@
 
 import setuptools
 
+# In python < 2.7.4, a lazy loading of package `pbr` will break
+# setuptools if some other modules registered functions in `atexit`.
+# solution from: http://bugs.python.org/issue15881#msg170215
+try:
+    import multiprocessing  # noqa
+except ImportError:
+    pass
 
 setuptools.setup(
-    name="openstack-voms-auth-type",
-    version="1.1",
-    author="Enol Fernandez",
-    author_email="enolfc@ifca.unican.es",
-    description="VOMS-based authentication for Openstack",
-    long_description=("This is a plugin for OpenStack Clients which provides "
-                      "client support for VOMS authentication extensions to "
-                      "OpenStack."),
-    license="Apache License, Version 2.0",
-    url="https://github.com/enolfc/openstack-voms-auth-type",
-    download_url=("https://github.com/enolfc/openstack-voms-auth-type/"
-                  "archive/master.tar.gz"),
-    packages=setuptools.find_packages(exclude=['tests', 'tests.*']),
-    zip_safe=False,
-    classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Environment :: Console",
-        "Intended Audience :: Developers",
-        "Intended Audience :: Information Technology",
-        "License :: OSI Approved :: Apache Software License",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python"
-    ],
-    entry_points={
-        "keystoneclient.auth.plugin": [
-            "v2voms = openstack_voms_auth_type.plugin:VomsAuthPlugin"
-        ],
-        "console_scripts": [
-            "keystone_tenants = openstack_voms_auth_type.get_tenants:main"
-        ]
-    }
+    setup_requires=['pbr>=1.8'],
+    pbr=True
 )
