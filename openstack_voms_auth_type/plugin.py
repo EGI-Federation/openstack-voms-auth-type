@@ -23,6 +23,13 @@ from positional import positional
 class VomsAuthPlugin(v2.Auth):
     @positional()
     def __init__(self, x509_user_proxy=None, **kwargs):
+        # remove v2 auth not valid args
+        if 'project_id' in kwargs:
+            kwargs['tenant_id'] = kwargs['project_id']
+            del kwargs['project_id']
+        if 'project_name' in kwargs:
+            kwargs['tenant_name'] = kwargs['project_name']
+            del kwargs['project_name']
         super(VomsAuthPlugin, self).__init__(**kwargs)
         self.x509_user_proxy = x509_user_proxy
 
