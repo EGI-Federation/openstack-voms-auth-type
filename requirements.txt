@@ -1,0 +1,4 @@
+pbr>=1.6
+keystoneauth1>=2.10.0
+osc-lib>=1.2.0
+python-openstackclient>=3.0
