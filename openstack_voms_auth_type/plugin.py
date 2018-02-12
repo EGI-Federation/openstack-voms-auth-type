@@ -37,12 +37,27 @@ class VomsAuthPlugin(v2.Auth):
         return {'voms': True}
 
     def get_auth_ref(self, session, **kwargs):
-        if self.x509_user_proxy:
-            session.cert = self.x509_user_proxy
-        else:
+        if not self.x509_user_proxy:
             msg = 'You need to specify a proxy file when using voms auth'
             raise TypeError(msg)
-        return super(VomsAuthPlugin, self).get_auth_ref(session, **kwargs)
+        session.cert = self.x509_user_proxy
+        # Create a temporary CA bundle to make proxy verification work
+        verify = session.verify
+        with NamedTemporaryFile() as bundle:
+            src_bundle = verify
+            if src_bundle is True:
+                src_bundle = certs.where()
+            with open(src_bundle, 'r+b') as src:
+                copyfileobj(src, bundle)
+            with open(self.x509_user_proxy, 'r+b') as proxy:
+                bundle.write(proxy.read())
+            bundle.flush()
+            session.verify = bundle.name
+            r = super(VomsAuthPlugin, self).get_auth_ref(session, **kwargs)
+        # Restore default settings to avoid failures in subsequent calls
+        session.verify = verify
+        session.cert = None
+        return r
 
 
 class VomsLoader(loading.BaseV2Loader):
