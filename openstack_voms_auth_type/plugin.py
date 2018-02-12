@@ -15,6 +15,11 @@
 # under the License.
 
 
+from shutil import copyfileobj
+from tempfile import NamedTemporaryFile
+
+from requests import certs
+
 from keystoneauth1 import loading
 from keystoneauth1.identity import v2
 from positional import positional
