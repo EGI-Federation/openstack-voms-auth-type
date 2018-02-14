@@ -52,9 +52,9 @@ class VomsAuthPlugin(v2.Auth):
             src_bundle = verify
             if src_bundle is True:
                 src_bundle = certs.where()
-            with open(src_bundle, 'r+b') as src:
+            with open(src_bundle, 'rb') as src:
                 copyfileobj(src, bundle)
-            with open(self.x509_user_proxy, 'r+b') as proxy:
+            with open(self.x509_user_proxy, 'rb') as proxy:
                 bundle.write(proxy.read())
             bundle.flush()
             session.verify = bundle.name
