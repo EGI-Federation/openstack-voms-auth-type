@@ -25,7 +25,7 @@ from keystoneauth1.identity import v2
 from positional import positional
 
 
-class VomsAuthPlugin(v2.Auth):
+class VomsV2AuthPlugin(v2.Auth):
     @positional()
     def __init__(self, x509_user_proxy=None, **kwargs):
         # remove v2 auth not valid args
@@ -35,7 +35,7 @@ class VomsAuthPlugin(v2.Auth):
         if 'project_name' in kwargs:
             kwargs['tenant_name'] = kwargs['project_name']
             del kwargs['project_name']
-        super(VomsAuthPlugin, self).__init__(**kwargs)
+        super(VomsV2AuthPlugin, self).__init__(**kwargs)
         self.x509_user_proxy = x509_user_proxy
 
     def get_auth_data(self, headers=None):
@@ -65,13 +65,13 @@ class VomsAuthPlugin(v2.Auth):
         return r
 
 
-class VomsLoader(loading.BaseV2Loader):
+class VomsV2Loader(loading.BaseV2Loader):
     @property
     def plugin_class(self):
-        return VomsAuthPlugin
+        return VomsV2AuthPlugin
 
     def get_options(self):
-        options = super(VomsLoader, self).get_options()
+        options = super(VomsV2Loader, self).get_options()
 
         options.extend([
             loading.Opt('x509-user-proxy',
