@@ -58,7 +58,7 @@ class VomsV2AuthPlugin(v2.Auth):
                 bundle.write(proxy.read())
             bundle.flush()
             session.verify = bundle.name
-            r = super(VomsAuthPlugin, self).get_auth_ref(session, **kwargs)
+            r = super(VomsV2AuthPlugin, self).get_auth_ref(session, **kwargs)
         # Restore default settings to avoid failures in subsequent calls
         session.verify = verify
         session.cert = None
