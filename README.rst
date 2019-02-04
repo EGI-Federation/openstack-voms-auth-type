@@ -23,12 +23,14 @@ Usage
 CLI
 ---
 
-You have to specify the `v2voms` in the `--os-auth-type` option and provide a
-valid proxy with `--os-x509-user-proxy`::
+You have to specify either `v2voms` or `v3voms` in the `--os-auth-type` option
+and provide a valid proxy with `--os-x509-user-proxy`.
+
+v2voms::
 
     openstack --os-auth-type v2voms --os-x509-user-proxy /tmp/x509up_u1000 token issue
 
-API
----
+v3voms, add also the protocol and identity provider as shown below::
 
-To be documented
+    openstack --os-auth-type v3voms --os-x509-user-proxy /tmp/x509up_u1000 \
+              --os-protocol mapped --os-identity-provider egi.eu token issue

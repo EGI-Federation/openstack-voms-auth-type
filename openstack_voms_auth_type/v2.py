@@ -14,18 +14,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-from shutil import copyfileobj
-from tempfile import NamedTemporaryFile
-
-from requests import certs
-
 from keystoneauth1 import loading
 from keystoneauth1.identity import v2
 from positional import positional
 
+import utils
 
-class VomsAuthPlugin(v2.Auth):
+class VomsV2AuthPlugin(v2.Auth):
     @positional()
     def __init__(self, x509_user_proxy=None, **kwargs):
         # remove v2 auth not valid args
@@ -35,43 +30,24 @@ class VomsAuthPlugin(v2.Auth):
         if 'project_name' in kwargs:
             kwargs['tenant_name'] = kwargs['project_name']
             del kwargs['project_name']
-        super(VomsAuthPlugin, self).__init__(**kwargs)
+        super(VomsV2AuthPlugin, self).__init__(**kwargs)
         self.x509_user_proxy = x509_user_proxy
 
     def get_auth_data(self, headers=None):
         return {'voms': True}
 
     def get_auth_ref(self, session, **kwargs):
-        if not self.x509_user_proxy:
-            msg = 'You need to specify a proxy file when using voms auth'
-            raise TypeError(msg)
-        session.cert = self.x509_user_proxy
-        # Create a temporary CA bundle to make proxy verification work
-        verify = session.verify
-        with NamedTemporaryFile() as bundle:
-            src_bundle = verify
-            if src_bundle is True:
-                src_bundle = certs.where()
-            with open(src_bundle, 'rb') as src:
-                copyfileobj(src, bundle)
-            with open(self.x509_user_proxy, 'rb') as proxy:
-                bundle.write(proxy.read())
-            bundle.flush()
-            session.verify = bundle.name
-            r = super(VomsAuthPlugin, self).get_auth_ref(session, **kwargs)
-        # Restore default settings to avoid failures in subsequent calls
-        session.verify = verify
-        session.cert = None
-        return r
+        with utils.BundleBuilder(session, self.x509_user_proxy) as p:
+            return super(VomsV2AuthPlugin, self).get_auth_ref(session, **kwargs)
 
 
-class VomsLoader(loading.BaseV2Loader):
+class VomsV2Loader(loading.BaseV2Loader):
     @property
     def plugin_class(self):
-        return VomsAuthPlugin
+        return VomsV2AuthPlugin
 
     def get_options(self):
-        options = super(VomsLoader, self).get_options()
+        options = super(VomsV2Loader, self).get_options()
 
         options.extend([
             loading.Opt('x509-user-proxy',
