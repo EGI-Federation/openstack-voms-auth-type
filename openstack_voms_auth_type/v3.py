@@ -14,15 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-from shutil import copyfileobj
-from tempfile import NamedTemporaryFile
-
-from requests import certs
-
 from keystoneauth1 import access
 from keystoneauth1.identity.v3.federation import FederationBaseAuth
 from keystoneauth1 import loading
+
+import utils
 
 
 class VomsV3AuthPlugin(FederationBaseAuth):
@@ -33,28 +29,9 @@ class VomsV3AuthPlugin(FederationBaseAuth):
         self.x509_user_proxy = x509_user_proxy
 
     def get_unscoped_auth_ref(self, session, **kwargs):
-        session.cert = self.x509_user_proxy
-        verify = session.verify
-        if verify:
-            # Create a temporary CA bundle to make proxy verification work
-            with NamedTemporaryFile() as bundle:
-                src_bundle = verify
-                if src_bundle is True:
-                    src_bundle = certs.where()
-                with open(src_bundle, 'rb') as src:
-                    copyfileobj(src, bundle)
-                with open(self.x509_user_proxy, 'rb') as proxy:
-                    bundle.write(proxy.read())
-                bundle.flush()
-                session.verify = bundle.name
-                auth_response = session.post(self.federated_token_url,
-                                             authenticated=False)
-                # Restore default settings to avoid failures in subsequent calls
-                session.verify = verify
-        else:
+        with utils.BundleBuilder(session, self.x509_user_proxy) as p:
             auth_response = session.post(self.federated_token_url,
                                          authenticated=False)
-        session.cert = None
         return access.create(auth_response)
 
 

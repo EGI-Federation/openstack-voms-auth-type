@@ -14,16 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-from shutil import copyfileobj
-from tempfile import NamedTemporaryFile
-
-from requests import certs
-
 from keystoneauth1 import loading
 from keystoneauth1.identity import v2
 from positional import positional
 
+import utils
 
 class VomsV2AuthPlugin(v2.Auth):
     @positional()
@@ -42,27 +37,8 @@ class VomsV2AuthPlugin(v2.Auth):
         return {'voms': True}
 
     def get_auth_ref(self, session, **kwargs):
-        if not self.x509_user_proxy:
-            msg = 'You need to specify a proxy file when using voms auth'
-            raise TypeError(msg)
-        session.cert = self.x509_user_proxy
-        # Create a temporary CA bundle to make proxy verification work
-        verify = session.verify
-        with NamedTemporaryFile() as bundle:
-            src_bundle = verify
-            if src_bundle is True:
-                src_bundle = certs.where()
-            with open(src_bundle, 'rb') as src:
-                copyfileobj(src, bundle)
-            with open(self.x509_user_proxy, 'rb') as proxy:
-                bundle.write(proxy.read())
-            bundle.flush()
-            session.verify = bundle.name
-            r = super(VomsV2AuthPlugin, self).get_auth_ref(session, **kwargs)
-        # Restore default settings to avoid failures in subsequent calls
-        session.verify = verify
-        session.cert = None
-        return r
+        with utils.BundleBuilder(session, self.x509_user_proxy) as p:
+            return super(VomsV2AuthPlugin, self).get_auth_ref(session, **kwargs)
 
 
 class VomsV2Loader(loading.BaseV2Loader):
